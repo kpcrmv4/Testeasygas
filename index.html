@@ -16,12 +16,19 @@
   #log { background: #fff; border: 1px solid #dfe3e8; border-radius: 10px; padding: 12px; font-size: 14px; white-space: pre-wrap; word-break: break-word; }
   .ok { color: #15803d; } .bad { color: #b42318; }
   input[type=file] { display: none; }
+  #inapp { display: none; background: #fff7e6; border: 1px solid #f0c36d; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 14px; }
+  #inapp button { margin: 10px 0 0; }
 </style>
 </head>
 <body>
 <h1>ทดสอบกล้องนอก GAS</h1>
 <p>หน้านี้อยู่นอก Google Apps Script และส่งรูปไปที่เว็บแอป GAS ตัวทดสอบ รูปไม่ถูกเก็บไว้ที่ไหน GAS ตอบกลับแค่ขนาดของรูป</p>
 
+<div id="inapp">
+  <strong>เปิดอยู่ในแอป <span id="inappName"></span></strong> กล้องสดอาจใช้ไม่ได้ ลองเปิดในเบราว์เซอร์ของเครื่อง
+  <button id="extA" class="alt">A. เปิดในเบราว์เซอร์ (วิธีของ LINE)</button>
+  <button id="extB" class="alt">B. เปิดใน Chrome (เฉพาะ Android)</button>
+</div>
 <video id="v" playsinline autoplay muted></video>
 <button id="open">1. เปิดกล้องสด</button>
 <button id="snap" disabled>2. ถ่ายแล้วส่งไป GAS</button>
@@ -46,7 +53,17 @@ log('โดเมน: ' + location.origin);
 log('เบราว์เซอร์ในแอป: ' + (inApp || 'ไม่ใช่'));
 log('รองรับกล้องสด: ' + (navigator.mediaDevices && navigator.mediaDevices.getUserMedia ? 'ใช่' : 'ไม่'));
 log(ua);
+log('เปิดด้วยลิงก์: ' + (location.search || '(ไม่มีพารามิเตอร์)'));
 log('');
+if (inApp) {
+  document.getElementById('inapp').style.display = 'block';
+  document.getElementById('inappName').textContent = inApp;
+  var here = location.origin + location.pathname;
+  document.getElementById('extA').onclick = function () { location.href = here + '?openExternalBrowser=1'; };
+  document.getElementById('extB').onclick = function () {
+    location.href = 'intent://' + location.host + location.pathname + '?from=intent#Intent;scheme=https;package=com.android.chrome;end';
+  };
+}
 
 function send(dataUrl, label) {
   var started = Date.now();
